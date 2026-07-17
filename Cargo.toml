@@ -1,6 +1,6 @@
 [package]
 name = "matomo-mcp"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 rust-version = "1.88"
 description = "Fast, curated MCP server for Matomo Analytics — ask your analytics anything from Claude, Cursor, or any MCP client"

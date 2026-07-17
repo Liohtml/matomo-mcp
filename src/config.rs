@@ -18,8 +18,9 @@ use url::Url;
 )]
 pub struct Args {
     /// Matomo instance URL, e.g. https://matomo.example.com or https://example.com/matomo/
+    /// If omitted, the server still starts and tool calls explain how to configure it.
     #[arg(short, long, env = "MATOMO_URL")]
-    pub url: String,
+    pub url: Option<String>,
 
     /// Matomo API token (token_auth). Create one under Settings → Personal → Security.
     #[arg(short, long, env = "MATOMO_TOKEN", hide_env_values = true)]
@@ -59,7 +60,7 @@ pub struct Args {
 /// Validated runtime configuration.
 #[derive(Debug, Clone)]
 pub struct Config {
-    pub base_url: Url,
+    pub base_url: Option<Url>,
     pub token: Option<String>,
     pub default_site_id: Option<u64>,
     pub extra_headers: HeaderMap,
@@ -70,11 +71,17 @@ pub struct Config {
 
 impl Config {
     pub fn from_args(args: &Args) -> Result<Self> {
-        let base_url =
-            Url::parse(&args.url).with_context(|| format!("invalid Matomo URL: {}", args.url))?;
-        if !matches!(base_url.scheme(), "http" | "https") {
-            bail!("Matomo URL must start with http:// or https://");
-        }
+        let base_url = args
+            .url
+            .as_deref()
+            .map(|raw| -> Result<Url> {
+                let url = Url::parse(raw).with_context(|| format!("invalid Matomo URL: {raw}"))?;
+                if !matches!(url.scheme(), "http" | "https") {
+                    bail!("Matomo URL must start with http:// or https://");
+                }
+                Ok(url)
+            })
+            .transpose()?;
 
         Ok(Self {
             base_url,
@@ -114,7 +121,7 @@ mod tests {
 
     fn base_args() -> Args {
         Args {
-            url: "https://matomo.example.com".into(),
+            url: Some("https://matomo.example.com".into()),
             token: Some("secret".into()),
             default_site_id: None,
             headers: vec![],
@@ -128,14 +135,25 @@ mod tests {
     #[test]
     fn accepts_valid_url() {
         let cfg = Config::from_args(&base_args()).unwrap();
-        assert_eq!(cfg.base_url.host_str(), Some("matomo.example.com"));
+        assert_eq!(
+            cfg.base_url.as_ref().and_then(|u| u.host_str()),
+            Some("matomo.example.com")
+        );
     }
 
     #[test]
     fn rejects_non_http_scheme() {
         let mut args = base_args();
-        args.url = "ftp://example.com".into();
+        args.url = Some("ftp://example.com".into());
         assert!(Config::from_args(&args).is_err());
+    }
+
+    #[test]
+    fn starts_without_url() {
+        let mut args = base_args();
+        args.url = None;
+        let cfg = Config::from_args(&args).unwrap();
+        assert!(cfg.base_url.is_none());
     }
 
     #[test]

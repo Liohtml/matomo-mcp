@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use rmcp::{transport::stdio, ServiceExt};
-use tracing::info;
+use tracing::{info, warn};
 use tracing_subscriber::EnvFilter;
 
 use matomo_mcp::client::MatomoClient;
@@ -21,25 +21,36 @@ async fn main() -> Result<()> {
 
     let args = Args::parse();
     let config = Config::from_args(&args)?;
-    let client = MatomoClient::new(&config)?;
+
+    // Lazy configuration: the MCP server always starts and answers
+    // introspection; without a URL, tool calls return setup guidance.
+    let client = match &config.base_url {
+        Some(_) => Some(MatomoClient::new(&config)?),
+        None => {
+            warn!("MATOMO_URL is not set — tool calls will return configuration guidance");
+            None
+        }
+    };
 
     if args.check {
+        let client = client.context("--check requires a Matomo URL (--url or MATOMO_URL)")?;
         return check(&client).await;
     }
+
+    let url_display = config
+        .base_url
+        .as_ref()
+        .map(|u| u.to_string())
+        .unwrap_or_else(|| "(not configured)".to_string());
 
     let registry = Registry::new(config.default_site_id);
     info!(
         tools = registry.tool_count(),
-        url = %config.base_url,
+        url = %url_display,
         "starting matomo-mcp on stdio"
     );
 
-    let service = MatomoServer::new(
-        client,
-        registry,
-        config.base_url.to_string(),
-        config.max_response_chars,
-    );
+    let service = MatomoServer::new(client, registry, url_display, config.max_response_chars);
 
     let server = service
         .serve(stdio())

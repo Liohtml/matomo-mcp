@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-07-17
+
+### Changed
+
+- `--url`/`MATOMO_URL` is no longer required at startup: the server now always
+  starts, answers MCP introspection (initialize, tools/list), and returns
+  setup guidance on tool calls until a URL is configured. This makes the
+  server work out of the box with directory health checks (e.g. Glama) and
+  client setups where env vars arrive later. `--check` still requires a URL.
+
 ## [0.1.2] - 2026-07-17
 
 ### Fixed
@@ -42,7 +52,8 @@ All notable changes to this project are documented here. The format follows
   multi-tenant setups).
 - Cross-platform binaries, Docker image, and crates.io packaging.
 
-[Unreleased]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Liohtml/matomo-mcp/releases/tag/v0.1.0

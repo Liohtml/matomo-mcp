@@ -57,7 +57,10 @@ pub struct MatomoClient {
 impl MatomoClient {
     pub fn new(config: &Config) -> anyhow::Result<Self> {
         // Preserve sub-directory installs (https://example.com/matomo/ → .../matomo/index.php).
-        let mut base = config.base_url.clone();
+        let mut base = config
+            .base_url
+            .clone()
+            .ok_or_else(|| anyhow::anyhow!("MATOMO_URL is not configured"))?;
         if !base.path().ends_with('/') {
             base.set_path(&format!("{}/", base.path()));
         }

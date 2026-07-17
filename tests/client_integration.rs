@@ -8,7 +8,7 @@ use wiremock::{Mock, MockServer, Request, ResponseTemplate};
 
 fn config_for(url: &str) -> Config {
     let args = Args {
-        url: url.to_string(),
+        url: Some(url.to_string()),
         token: Some("test-token".to_string()),
         default_site_id: None,
         headers: vec!["X-Test-Header:hello".to_string()],

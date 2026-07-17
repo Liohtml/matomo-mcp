@@ -11,9 +11,15 @@ use tracing::debug;
 use crate::client::MatomoClient;
 use crate::tools::Registry;
 
+/// Guidance returned when the server runs without a configured Matomo URL.
+const UNCONFIGURED_HINT: &str =
+    "Matomo is not configured. Set the MATOMO_URL (and usually MATOMO_TOKEN) environment \
+     variables — or the --url/--token flags — and restart the MCP server. Example: \
+     MATOMO_URL=https://matomo.example.com MATOMO_TOKEN=... matomo-mcp";
+
 #[derive(Clone)]
 pub struct MatomoServer {
-    client: Arc<MatomoClient>,
+    client: Option<Arc<MatomoClient>>,
     registry: Arc<Registry>,
     matomo_url: String,
     max_response_chars: usize,
@@ -21,13 +27,13 @@ pub struct MatomoServer {
 
 impl MatomoServer {
     pub fn new(
-        client: MatomoClient,
+        client: Option<MatomoClient>,
         registry: Registry,
         matomo_url: String,
         max_response_chars: usize,
     ) -> Self {
         Self {
-            client: Arc::new(client),
+            client: client.map(Arc::new),
             registry: Arc::new(registry),
             matomo_url,
             max_response_chars,
@@ -103,11 +109,11 @@ impl ServerHandler for MatomoServer {
             Err(message) => return Ok(error_result(message)),
         };
 
-        match self
-            .client
-            .call(&invocation.method, &invocation.params)
-            .await
-        {
+        let Some(client) = &self.client else {
+            return Ok(error_result(UNCONFIGURED_HINT.to_string()));
+        };
+
+        match client.call(&invocation.method, &invocation.params).await {
             Ok(value) => Ok(CallToolResult {
                 content: vec![Content::text(shape_response(
                     &value,
