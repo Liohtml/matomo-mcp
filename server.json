@@ -1,19 +1,19 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.liohtml/matomo-mcp",
+  "name": "io.github.Liohtml/matomo-mcp",
   "title": "Matomo Analytics",
   "description": "Curated read-only Matomo Analytics tools: traffic, pages, referrers, e-commerce, real-time & more.",
   "repository": {
     "url": "https://github.com/Liohtml/matomo-mcp",
     "source": "github"
   },
-  "version": "0.1.1",
+  "version": "0.1.2",
   "websiteUrl": "https://github.com/Liohtml/matomo-mcp",
   "packages": [
     {
       "registryType": "cargo",
       "identifier": "matomo-mcp",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "transport": {
         "type": "stdio"
       },
@@ -43,7 +43,7 @@
     },
     {
       "registryType": "oci",
-      "identifier": "ghcr.io/liohtml/matomo-mcp:v0.1.1",
+      "identifier": "ghcr.io/liohtml/matomo-mcp:v0.1.2",
       "transport": {
         "type": "stdio"
       },

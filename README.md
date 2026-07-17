@@ -346,7 +346,7 @@ Architecture and design decisions: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 Built with [rmcp](https://crates.io/crates/rmcp), the official Rust MCP SDK. Inspired by [FGRibreau/mcp-matomo](https://github.com/FGRibreau/mcp-matomo).
 
-- MCP Registry name: `mcp-name: io.github.liohtml/matomo-mcp`
+- MCP Registry name: `mcp-name: io.github.Liohtml/matomo-mcp`
 
 ---
 
