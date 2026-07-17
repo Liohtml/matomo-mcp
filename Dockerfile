@@ -16,6 +16,9 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+# Ownership verification for the official MCP Registry.
+LABEL io.modelcontextprotocol.server.name="io.github.liohtml/matomo-mcp"
+
 COPY --from=builder /build/target/release/matomo-mcp /usr/local/bin/matomo-mcp
 
 # MCP stdio server: keep stdin/stdout clean, logs go to stderr.

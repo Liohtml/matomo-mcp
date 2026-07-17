@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-17
+
+### Added
+
+- Official MCP Registry metadata: `server.json` (2025-12-11 schema, cargo +
+  OCI packages), ownership-verification label in the Docker image, and the
+  `mcp-name` token in the README for crates.io verification.
+- `publish-mcp.yml` workflow to publish to the MCP Registry via GitHub OIDC.
+
 ## [0.1.0] - 2026-07-17
 
 ### Added
@@ -26,5 +35,6 @@ All notable changes to this project are documented here. The format follows
   multi-tenant setups).
 - Cross-platform binaries, Docker image, and crates.io packaging.
 
-[Unreleased]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Liohtml/matomo-mcp/releases/tag/v0.1.0
