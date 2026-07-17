@@ -1,0 +1,18 @@
+name: Feature request
+description: Suggest a new tool or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: What question should the model be able to answer?
+      description: >
+        Tools here are curated around real analytics questions, e.g.
+        "which campaigns drove the most conversions last month?"
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Does matomo_api cover it today?
+      description: If yes, what makes a dedicated tool worth it?

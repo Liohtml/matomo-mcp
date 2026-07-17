@@ -1,0 +1,40 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.json",
+  "name": "io.github.liohtml/matomo-mcp",
+  "description": "Fast, curated MCP server for Matomo Analytics — traffic, pages, referrers, goals, e-commerce, devices, locations and real-time data as 14 read-only tools plus a full-API escape hatch.",
+  "repository": {
+    "url": "https://github.com/Liohtml/matomo-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registry_type": "oci",
+      "identifier": "ghcr.io/liohtml/matomo-mcp",
+      "version": "latest",
+      "transport": {
+        "type": "stdio"
+      },
+      "environment_variables": [
+        {
+          "name": "MATOMO_URL",
+          "description": "Matomo instance URL, e.g. https://matomo.example.com",
+          "is_required": true,
+          "is_secret": false
+        },
+        {
+          "name": "MATOMO_TOKEN",
+          "description": "Matomo API token (token_auth) with view access",
+          "is_required": true,
+          "is_secret": true
+        },
+        {
+          "name": "MATOMO_DEFAULT_SITE_ID",
+          "description": "Optional default site ID",
+          "is_required": false,
+          "is_secret": false
+        }
+      ]
+    }
+  ]
+}
