@@ -38,6 +38,34 @@
           "isRequired": false,
           "isSecret": false,
           "format": "number"
+        },
+        {
+          "name": "MATOMO_EXTRA_HEADERS",
+          "description": "Extra HTTP headers as comma-separated 'Name:Value' pairs (auth proxies, Zero-Trust)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "MATOMO_TIMEOUT_SECS",
+          "description": "Per-request timeout in seconds (default 30)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "number"
+        },
+        {
+          "name": "MATOMO_MAX_RESPONSE_CHARS",
+          "description": "Response budget in characters before truncation (default 50000)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "number"
+        },
+        {
+          "name": "MATOMO_INSECURE",
+          "description": "Set to 'true' to accept self-signed TLS certificates (explicit opt-in)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "boolean"
         }
       ]
     },
@@ -68,6 +96,34 @@
           "isRequired": false,
           "isSecret": false,
           "format": "number"
+        },
+        {
+          "name": "MATOMO_EXTRA_HEADERS",
+          "description": "Extra HTTP headers as comma-separated 'Name:Value' pairs (auth proxies, Zero-Trust)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "MATOMO_TIMEOUT_SECS",
+          "description": "Per-request timeout in seconds (default 30)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "number"
+        },
+        {
+          "name": "MATOMO_MAX_RESPONSE_CHARS",
+          "description": "Response budget in characters before truncation (default 50000)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "number"
+        },
+        {
+          "name": "MATOMO_INSECURE",
+          "description": "Set to 'true' to accept self-signed TLS certificates (explicit opt-in)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "boolean"
         }
       ]
     }

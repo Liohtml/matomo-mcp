@@ -256,7 +256,7 @@ All tools accept `site_id`, `period` (`day`/`week`/`month`/`year`/`range`), `dat
 
 | Flag | Env | Default | Description |
 |------|-----|---------|-------------|
-| `--url` | `MATOMO_URL` | — *(required)* | Matomo instance URL (sub-directory installs like `https://example.com/matomo/` work) |
+| `--url` | `MATOMO_URL` | — | Matomo instance URL (sub-directory installs like `https://example.com/matomo/` work). Without it the server still starts and tool calls return setup guidance |
 | `--token` | `MATOMO_TOKEN` | — | API token (`token_auth`), view access is enough |
 | `--default-site-id` | `MATOMO_DEFAULT_SITE_ID` | — | Site used when the model doesn't specify one |
 | `--header` | `MATOMO_EXTRA_HEADERS` | — | Extra HTTP headers (`Name:Value`, repeatable / comma-separated) — for auth proxies, Zero-Trust, multi-tenant setups |
@@ -326,7 +326,7 @@ That's the context guard doing its job. Ask for fewer rows, a shorter date range
 - [ ] `matomo_annotations` — read & correlate deploy markers with traffic
 - [ ] Multi-instance support (one server, several Matomo installations)
 - [ ] Homebrew tap & winget manifest
-- [ ] MCP registry listing
+- [x] MCP registry listing (official registry via `server.json`, Glama)
 
 Want one of these sooner? [Open an issue](https://github.com/Liohtml/matomo-mcp/issues) — or a PR, see [CONTRIBUTING.md](CONTRIBUTING.md).
 

@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- MCP tool annotations: every curated tool now advertises `readOnlyHint: true`
+  and a human-readable title; `matomo_api` (the raw escape hatch) is explicitly
+  marked as *not* read-only since Reporting API methods can also write.
+  Clients that honor annotations can skip confirmation prompts for the
+  read-only tools.
+- Server icon (the project logo) in the MCP initialize handshake, shown by
+  clients that support icons.
+
+### Changed
+
+- Advertised MCP protocol version raised from 2024-11-05 to 2025-03-26; rmcp
+  negotiates down automatically for clients on older versions.
+- `server.json` now documents all supported environment variables
+  (`MATOMO_EXTRA_HEADERS`, `MATOMO_TIMEOUT_SECS`, `MATOMO_MAX_RESPONSE_CHARS`,
+  `MATOMO_INSECURE`), not just the three core ones.
+
 ## [0.1.3] - 2026-07-17
 
 ### Changed

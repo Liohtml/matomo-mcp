@@ -58,12 +58,19 @@ pub fn shape_response(value: &serde_json::Value, max_chars: usize) -> String {
 impl ServerHandler for MatomoServer {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
-            protocol_version: ProtocolVersion::V_2024_11_05,
+            // rmcp negotiates down to the client's version automatically.
+            protocol_version: ProtocolVersion::LATEST,
             capabilities: ServerCapabilities::builder().enable_tools().build(),
             server_info: Implementation {
                 name: "matomo-mcp".to_string(),
                 version: env!("CARGO_PKG_VERSION").to_string(),
-                icons: None,
+                icons: Some(vec![Icon {
+                    src:
+                        "https://raw.githubusercontent.com/Liohtml/matomo-mcp/main/assets/logo.svg"
+                            .to_string(),
+                    mime_type: Some("image/svg+xml".to_string()),
+                    sizes: Some(vec!["any".to_string()]),
+                }]),
                 title: Some("Matomo Analytics".to_string()),
                 website_url: Some("https://github.com/Liohtml/matomo-mcp".to_string()),
             },
