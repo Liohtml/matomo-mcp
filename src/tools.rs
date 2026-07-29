@@ -8,7 +8,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use rmcp::model::Tool;
+use rmcp::model::{Tool, ToolAnnotations};
 use serde_json::{json, Map, Value};
 
 // ---------------------------------------------------------------------------
@@ -108,6 +108,8 @@ pub enum Binding {
 #[derive(Debug, Clone)]
 pub struct ToolSpec {
     pub name: &'static str,
+    /// Human-readable title shown by MCP clients.
+    pub title: &'static str,
     pub description: &'static str,
     pub params: Vec<ParamSpec>,
     pub binding: Binding,
@@ -278,6 +280,7 @@ pub fn catalog() -> Vec<ToolSpec> {
     vec![
         ToolSpec {
             name: "matomo_list_sites",
+            title: "List Sites",
             description: "List all websites in Matomo that this token can access, with their ID, \
                           name and main URL. Call this first whenever the site_id is unknown.",
             params: vec![p_limit("100")],
@@ -288,6 +291,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_visits_summary",
+            title: "Visits Summary",
             description: "Key traffic metrics for a site and period: visits, unique visitors, \
                           actions (pageviews), bounce rate, actions per visit, and average visit \
                           duration. The go-to tool for 'how much traffic did we get?'.",
@@ -299,6 +303,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_pages",
+            title: "Pages",
             description: "Page-level analytics: most visited page URLs or titles, entry and exit \
                           pages, file downloads, and clicked outbound links. URLs are returned \
                           flattened (full paths), sorted by visits.",
@@ -318,6 +323,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_referrers",
+            title: "Referrers",
             description: "Where traffic comes from: channel overview (direct, search, websites, \
                           social, campaigns), referring websites, search engines and keywords, \
                           social networks, campaign performance, and AI assistants (Matomo 5.1+).",
@@ -337,6 +343,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_events",
+            title: "Events",
             description: "Custom event tracking reports (clicks, video plays, form interactions, \
                           ...), grouped by event category, action, or name.",
             params: {
@@ -355,6 +362,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_goals",
+            title: "Goals",
             description: "Goal conversions: overall conversion counts, rates and revenue \
                           (report=conversions), or the list of configured goals with their IDs \
                           (report=list).",
@@ -383,6 +391,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_ecommerce",
+            title: "E-commerce",
             description: "E-commerce performance: revenue/order overview, and best-selling \
                           products by product name, SKU, or category.",
             params: {
@@ -401,6 +410,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_geo",
+            title: "Visitor Locations",
             description: "Visitor locations: visits broken down by country, continent, region, \
                           or city.",
             params: {
@@ -415,6 +425,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_devices",
+            title: "Devices & Technology",
             description: "Devices and technology used by visitors: device types (desktop, mobile, \
                           tablet), brands, models, browsers, browser versions, operating systems, \
                           and screen resolutions.",
@@ -434,6 +445,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_visit_times",
+            title: "Visit Times",
             description: "When visitors come to the site: traffic by day of week, or by hour of \
                           day (server time or the visitor's local time).",
             params: {
@@ -452,6 +464,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_site_search",
+            title: "Site Search",
             description: "Internal site-search analytics: what visitors searched for on the site, \
                           searches that returned no results, and search categories.",
             params: {
@@ -470,6 +483,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_realtime",
+            title: "Real-Time Visitors",
             description: "Real-time analytics: live visitor/action/conversion counters for the \
                           last N minutes (report=counters), or a detailed log of the most recent \
                           individual visits (report=last_visits).",
@@ -497,6 +511,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_page_performance",
+            title: "Page Performance",
             description: "Page load performance: average network, server, transfer, DOM \
                           processing and rendering times across pageviews.",
             params: report_params(None),
@@ -507,6 +522,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "matomo_api",
+            title: "Raw Reporting API",
             description: "Escape hatch: call ANY Matomo Reporting API method directly. Prefer the \
                           dedicated matomo_* tools; use this for reports they don't cover (custom \
                           dimensions, funnels, heatmaps, segment management, ...). Discover \
@@ -826,15 +842,25 @@ fn build_mcp_tool(spec: &ToolSpec, default_site_id: Option<u64>) -> Tool {
         schema.insert("required".into(), Value::Array(required));
     }
 
+    // Every curated tool is a read-only report; only the raw escape hatch can
+    // reach Reporting API methods that write (segments, annotations, ...).
+    let read_only = !matches!(spec.binding, Binding::Raw);
+
     Tool {
         name: spec.name.into(),
         description: Some(spec.description.into()),
         input_schema: Arc::new(schema),
-        annotations: None,
+        annotations: Some(ToolAnnotations {
+            title: Some(spec.title.to_string()),
+            read_only_hint: Some(read_only),
+            destructive_hint: None,
+            idempotent_hint: None,
+            open_world_hint: Some(false),
+        }),
         icons: None,
         meta: None,
         output_schema: None,
-        title: None,
+        title: Some(spec.title.into()),
     }
 }
 
@@ -1047,6 +1073,26 @@ mod tests {
 
         let schema = find(&with_default);
         assert!(schema.input_schema.get("required").is_none());
+    }
+
+    #[test]
+    fn annotations_mark_curated_tools_read_only() {
+        let registry = Registry::new(None);
+        for tool in registry.mcp_tools() {
+            let annotations = tool.annotations.as_ref().expect("annotations present");
+            let read_only = tool.name != "matomo_api";
+            assert_eq!(
+                annotations.read_only_hint,
+                Some(read_only),
+                "tool {} has wrong readOnlyHint",
+                tool.name
+            );
+            assert!(
+                tool.title.is_some(),
+                "tool {} is missing a title",
+                tool.name
+            );
+        }
     }
 
     #[test]
