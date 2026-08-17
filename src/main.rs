@@ -1,6 +1,12 @@
+use std::net::SocketAddr;
+
 use anyhow::{Context, Result};
 use clap::Parser;
-use rmcp::{transport::stdio, ServiceExt};
+use rmcp::transport::streamable_http_server::{
+    session::local::LocalSessionManager, tower::StreamableHttpService,
+};
+use rmcp::transport::{stdio, StreamableHttpServerConfig};
+use rmcp::ServiceExt;
 use tracing::{info, warn};
 use tracing_subscriber::EnvFilter;
 
@@ -47,10 +53,14 @@ async fn main() -> Result<()> {
     info!(
         tools = registry.tool_count(),
         url = %url_display,
-        "starting matomo-mcp on stdio"
+        "starting matomo-mcp"
     );
 
     let service = MatomoServer::new(client, registry, url_display, config.max_response_chars);
+
+    if let Some(addr) = args.http {
+        return serve_http(service, addr).await;
+    }
 
     let server = service
         .serve(stdio())
@@ -59,6 +69,37 @@ async fn main() -> Result<()> {
     server.waiting().await?;
 
     info!("matomo-mcp stopped");
+    Ok(())
+}
+
+/// Serve MCP over streamable HTTP: host the server once, connect many clients.
+async fn serve_http(service: MatomoServer, addr: SocketAddr) -> Result<()> {
+    if !addr.ip().is_loopback() {
+        warn!(
+            "the HTTP transport has no built-in authentication and {addr} is not loopback — \
+             restrict access via a reverse proxy or firewall"
+        );
+    }
+
+    let http_service = StreamableHttpService::new(
+        move || Ok(service.clone()),
+        LocalSessionManager::default().into(),
+        StreamableHttpServerConfig::default(),
+    );
+    let router = axum::Router::new().nest_service("/mcp", http_service);
+
+    let listener = tokio::net::TcpListener::bind(addr)
+        .await
+        .with_context(|| format!("failed to bind {addr}"))?;
+    info!("serving MCP over streamable HTTP at http://{addr}/mcp (Ctrl-C to stop)");
+
+    axum::serve(listener, router)
+        .with_graceful_shutdown(async {
+            let _ = tokio::signal::ctrl_c().await;
+            info!("shutting down");
+        })
+        .await
+        .context("HTTP server error")?;
     Ok(())
 }
 

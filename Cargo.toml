@@ -15,8 +15,13 @@ categories = ["command-line-utilities", "web-programming"]
 exclude = ["assets/", ".github/", "docs/"]
 
 [dependencies]
-rmcp = { version = "0.12", features = ["server", "transport-io"] }
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "time", "io-std"] }
+rmcp = { version = "0.12", features = [
+    "server",
+    "transport-io",
+    "transport-streamable-http-server",
+] }
+axum = { version = "0.8", default-features = false, features = ["http1", "tokio"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time", "io-std", "net", "signal"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

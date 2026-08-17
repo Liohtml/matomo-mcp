@@ -8,6 +8,14 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Streamable HTTP transport: `--http <addr>` (or `MATOMO_HTTP_BIND`) serves
+  MCP at `http://<addr>/mcp` — host the server once, connect many clients.
+  The endpoint has no built-in authentication; a warning is logged when
+  binding to a non-loopback address. stdio remains the default.
+- New `matomo_annotations` tool: read annotations (deploy markers, campaign
+  launches, notes) for a date range to correlate traffic changes with events.
+  Defaults to the last 30 days.
+
 - MCP tool annotations: every curated tool now advertises `readOnlyHint: true`
   and a human-readable title; `matomo_api` (the raw escape hatch) is explicitly
   marked as *not* read-only since Reporting API methods can also write.

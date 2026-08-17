@@ -52,6 +52,13 @@ pub struct Args {
     #[arg(long, env = "MATOMO_MAX_RESPONSE_CHARS", default_value_t = 50_000)]
     pub max_response_chars: usize,
 
+    /// Serve MCP over streamable HTTP on this address (e.g. 127.0.0.1:8080)
+    /// instead of stdio. The endpoint is http://<addr>/mcp. The transport has
+    /// no built-in authentication — bind to localhost or put it behind a
+    /// reverse proxy.
+    #[arg(long, env = "MATOMO_HTTP_BIND", value_name = "ADDR")]
+    pub http: Option<std::net::SocketAddr>,
+
     /// Verify connectivity and token against the Matomo instance, print a summary, then exit.
     #[arg(long)]
     pub check: bool,
@@ -128,6 +135,7 @@ mod tests {
             timeout_secs: 30,
             insecure: false,
             max_response_chars: 50_000,
+            http: None,
             check: false,
         }
     }

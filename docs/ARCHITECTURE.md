@@ -21,7 +21,7 @@ generates one MCP tool per API method (~70+ tools). That approach has costs:
 - **Slow startup.** Multiple network round-trips before the server can answer
   its first request.
 
-matomo-mcp inverts this: **14 hand-written tools** modeled on the questions
+matomo-mcp inverts this: **15 hand-written tools** modeled on the questions
 people actually ask (traffic? top pages? where from? which devices? live right
 now?), each mapping to one or more Matomo reporting methods via a small
 declarative catalog (`src/tools.rs`). One escape hatch — `matomo_api` — keeps
@@ -39,7 +39,7 @@ Consequences:
 
 ```
 src/
-├── main.rs      CLI entry: parse args, wire everything, serve stdio. Also `--check`.
+├── main.rs      CLI entry: parse args, wire everything, serve stdio or HTTP. Also `--check`.
 ├── config.rs    clap Args → validated Config (URL scheme, header parsing).
 ├── client.rs    Matomo HTTP client: POST-only auth, retries, error mapping,
 │                token redaction, response-size preview caps.
@@ -50,7 +50,7 @@ src/
 Data flow for a tool call:
 
 ```
-MCP client ──stdio──▶ server.rs (call_tool)
+MCP client ─stdio/HTTP─▶ server.rs (call_tool)
                         │  Registry::resolve → Invocation {method, params}
                         ▼
                       client.rs ──POST index.php──▶ Matomo
@@ -88,14 +88,12 @@ with exponential backoff before surfacing.
 ## Testing strategy
 
 - Unit tests cover the dispatch table: defaults, select-case routing, coercion,
-  reserved-key stripping, schema generation (33 tests total).
+  reserved-key stripping, schema generation (37 tests total).
 - Integration tests run the real client against an in-process wiremock server:
   form encoding, sub-directory installs, retry behavior, redaction. No live
   Matomo needed; the suite is offline and deterministic.
 
 ## Deliberate non-goals (for now)
 
-- **HTTP/SSE transport** — stdio covers the dominant client setups; a
-  streamable-HTTP mode is on the roadmap.
 - **Write operations** (creating goals/segments) — read-only is a feature.
 - **Response schema inference** — high effort, low LLM benefit.
