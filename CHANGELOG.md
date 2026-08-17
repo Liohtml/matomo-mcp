@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-08-17
+
 ### Added
 
 - Streamable HTTP transport: `--http <addr>` (or `MATOMO_HTTP_BIND`) serves
@@ -78,7 +80,8 @@ All notable changes to this project are documented here. The format follows
   multi-tenant setups).
 - Cross-platform binaries, Docker image, and crates.io packaging.
 
-[Unreleased]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Liohtml/matomo-mcp/compare/v0.1.0...v0.1.1
