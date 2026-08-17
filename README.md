@@ -12,7 +12,7 @@
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](https://www.rust-lang.org)
 [![MCP](https://img.shields.io/badge/MCP-compatible-8A2BE2)](https://modelcontextprotocol.io)
 
-*14 curated, read-only analytics tools + a full-API escape hatch. Single binary, instant startup, context-friendly.*
+*15 curated, read-only analytics tools + a full-API escape hatch. Single binary, instant startup, context-friendly.*
 
 [Quickstart](#-quickstart) · [Clients](#-connect-your-client) · [Tools](#-tools) · [Configuration](#%EF%B8%8F-configuration) · [FAQ](#-troubleshooting)
 
@@ -37,7 +37,7 @@ Every question your Matomo dashboard can answer, your AI assistant can now answe
 
 | | |
 |---|---|
-| 🎯 **Curated, not generated** | 14 hand-crafted tools modeled on real analytics questions — not 70+ auto-generated API mirrors that flood the model's context and degrade tool selection. |
+| 🎯 **Curated, not generated** | 15 hand-crafted tools modeled on real analytics questions — not 70+ auto-generated API mirrors that flood the model's context and degrade tool selection. |
 | ⚡ **Instant startup** | No introspection round-trips. One static binary, no Node, no Python, no runtime. Starts in milliseconds. |
 | 🔒 **Safe by default** | Read-only reporting tools. Token sent via POST only (never in URLs/logs), redacted from every error. TLS verification on by default. |
 | 🧠 **Context-friendly** | Row limits on every report and a hard response budget with actionable guidance — one tool call can never blow up the context window. |
@@ -217,6 +217,30 @@ Any client that speaks MCP over stdio works with the generic shape:
 
 </details>
 
+<details>
+<summary><b>Streamable HTTP — host once, connect many clients</b></summary>
+
+Run the server once (on a workstation, LAN box, or container) and point any
+number of MCP clients at it:
+
+```bash
+matomo-mcp --url https://your-matomo.example.com --token YOUR_TOKEN --http 127.0.0.1:8080
+```
+
+Clients connect to `http://127.0.0.1:8080/mcp` with the streamable HTTP
+transport, e.g.:
+
+```bash
+claude mcp add --transport http matomo http://127.0.0.1:8080/mcp
+```
+
+> [!WARNING]
+> The HTTP endpoint has no built-in authentication. Keep it bound to
+> `127.0.0.1`, or put a reverse proxy with auth (or a firewall) in front
+> before exposing it beyond localhost.
+
+</details>
+
 > [!TIP]
 > Set `MATOMO_DEFAULT_SITE_ID` and the model never has to ask which site you mean.
 > No token at hand? Try it against the public demo: `--url https://demo.matomo.cloud --default-site-id 1` (no token needed).
@@ -238,6 +262,7 @@ Any client that speaks MCP over stdio works with the generic shape:
 | `matomo_site_search` | *"What do people search for on our site — and find nothing?"* |
 | `matomo_realtime` | *"Who's on the site right now?"* |
 | `matomo_page_performance` | *"Which pages load slowly?"* |
+| `matomo_annotations` | *"Which deploys or campaign launches line up with that traffic spike?"* |
 | `matomo_api` | Everything else — funnels, heatmaps, custom dimensions, any `Module.action` of the Reporting API |
 
 All tools accept `site_id`, `period` (`day`/`week`/`month`/`year`/`range`), `date`
@@ -262,6 +287,7 @@ All tools accept `site_id`, `period` (`day`/`week`/`month`/`year`/`range`), `dat
 | `--header` | `MATOMO_EXTRA_HEADERS` | — | Extra HTTP headers (`Name:Value`, repeatable / comma-separated) — for auth proxies, Zero-Trust, multi-tenant setups |
 | `--timeout-secs` | `MATOMO_TIMEOUT_SECS` | `30` | Per-request timeout |
 | `--max-response-chars` | `MATOMO_MAX_RESPONSE_CHARS` | `50000` | Response budget before truncation |
+| `--http` | `MATOMO_HTTP_BIND` | — | Serve MCP over streamable HTTP on this address instead of stdio (endpoint: `http://<addr>/mcp`) |
 | `--insecure` | `MATOMO_INSECURE` | `false` | Accept self-signed TLS certificates (explicit opt-in) |
 | `--check` | — | — | Verify URL + token + site access, then exit |
 
@@ -271,7 +297,7 @@ All tools accept `site_id`, `period` (`day`/`week`/`month`/`year`/`range`), `dat
 
 | | matomo-mcp | mcp-matomo |
 |---|---|---|
-| Tool set | 14 curated tools + escape hatch | ~70+ generated tools |
+| Tool set | 15 curated tools + escape hatch | ~70+ generated tools |
 | Model context cost | Small, stable | Large, instance-dependent |
 | Parameter types | Exact, hand-written enums/defaults | Inferred from parameter names |
 | Startup | Instant (no network I/O) | Introspection round-trips (or cached spec file) |
@@ -322,8 +348,8 @@ That's the context guard doing its job. Ask for fewer rows, a shorter date range
 
 ## 🗺️ Roadmap
 
-- [ ] Streamable HTTP transport (host it once, connect many clients)
-- [ ] `matomo_annotations` — read & correlate deploy markers with traffic
+- [x] Streamable HTTP transport (`--http`, host it once, connect many clients)
+- [x] `matomo_annotations` — read & correlate deploy markers with traffic
 - [ ] Multi-instance support (one server, several Matomo installations)
 - [ ] Homebrew tap & winget manifest
 - [x] MCP registry listing (official registry via `server.json`, Glama)
@@ -333,7 +359,7 @@ Want one of these sooner? [Open an issue](https://github.com/Liohtml/matomo-mcp/
 ## 🛠️ Development
 
 ```bash
-cargo test                                   # 33 tests, fully offline (wiremock)
+cargo test                                   # 37 tests, fully offline (wiremock)
 cargo clippy --all-targets -- -D warnings
 cargo run -- --url https://demo.matomo.cloud --default-site-id 1 --check
 ```

@@ -15,6 +15,7 @@ fn config_for(url: &str) -> Config {
         timeout_secs: 5,
         insecure: false,
         max_response_chars: 50_000,
+        http: None,
         check: false,
     };
     Config::from_args(&args).unwrap()

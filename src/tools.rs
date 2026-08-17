@@ -1,7 +1,7 @@
 //! Curated tool catalog and argument dispatch.
 //!
 //! Instead of auto-generating one tool per Matomo API method (70+ tools that
-//! flood the model's context), we expose ~14 hand-crafted tools that cover the
+//! flood the model's context), we expose ~15 hand-crafted tools that cover the
 //! common analytics questions, plus `matomo_api` as an escape hatch for the
 //! full Reporting API.
 
@@ -517,6 +517,28 @@ pub fn catalog() -> Vec<ToolSpec> {
             params: report_params(None),
             binding: Binding::Fixed {
                 method: "PagePerformance.get",
+                fixed: &[],
+            },
+        },
+        ToolSpec {
+            name: "matomo_annotations",
+            title: "Annotations",
+            description: "Annotations placed on the Matomo timeline (deploy markers, campaign \
+                          launches, notes) for a date range — correlate traffic changes with what \
+                          happened when. Defaults to the last 30 days.",
+            params: vec![
+                p_site(),
+                p_period(),
+                ParamSpec::new(
+                    "date",
+                    ParamKind::String,
+                    "Date or range to fetch annotations for: 'today', 'yesterday', 'YYYY-MM-DD', \
+                     a rolling window like 'last30'/'last90', or 'YYYY-MM-DD,YYYY-MM-DD'.",
+                )
+                .default_value("last30"),
+            ],
+            binding: Binding::Fixed {
+                method: "Annotations.getAll",
                 fixed: &[],
             },
         },
@@ -1073,6 +1095,17 @@ mod tests {
 
         let schema = find(&with_default);
         assert!(schema.input_schema.get("required").is_none());
+    }
+
+    #[test]
+    fn annotations_tool_defaults_to_last_30_days() {
+        let registry = Registry::new(Some(1));
+        let inv = registry
+            .resolve("matomo_annotations", &args(json!({})))
+            .unwrap();
+        assert_eq!(inv.method, "Annotations.getAll");
+        assert!(inv.params.contains(&("date".into(), "last30".into())));
+        assert!(inv.params.contains(&("idSite".into(), "1".into())));
     }
 
     #[test]
